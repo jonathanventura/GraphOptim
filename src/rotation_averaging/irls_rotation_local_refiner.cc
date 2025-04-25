@@ -41,6 +41,7 @@
 #include "utils/map_util.h"
 #include "utils/types.h"
 #include "utils/timer.h"
+#include <Eigen/SparseCholesky>
 
 namespace gopt {
 
