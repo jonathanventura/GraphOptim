@@ -92,9 +92,9 @@ bool IRLSRotationLocalRefiner::SolveIRLS(
   // Set up the linear solver and analyze the sparsity pattern of the
   // system. Since the sparsity pattern will not change with each linear solve
   // this can help speed up the solution time.
-  SparseCholeskyLLt linear_solver;
-  linear_solver.AnalyzePattern(sparse_matrix_.transpose() * sparse_matrix_);
-  if (linear_solver.Info() != Eigen::Success) {
+  Eigen::SimplicialLLT< Eigen::SparseMatrix<double> > linear_solver;
+  linear_solver.analyzePattern(sparse_matrix_.transpose() * sparse_matrix_);
+  if (linear_solver.info() != Eigen::Success) {
     LOG(ERROR) << "Cholesky decomposition failed.";
     return false;
   }
@@ -124,16 +124,16 @@ bool IRLSRotationLocalRefiner::SolveIRLS(
 
     // Update the factorization for the weighted values.
     at_weight = sparse_matrix_.transpose() * weights.matrix().asDiagonal();
-    linear_solver.Factorize(at_weight * sparse_matrix_);
-    if (linear_solver.Info() != Eigen::Success) {
+    linear_solver.factorize(at_weight * sparse_matrix_);
+    if (linear_solver.info() != Eigen::Success) {
       LOG(ERROR) << "Failed to factorize the least squares system.";
       return false;
     }
 
     // Solve the least squares problem.
-    tangent_space_step_ =
-        linear_solver.Solve(at_weight * tangent_space_residual_);
-    if (linear_solver.Info() != Eigen::Success) {
+    tangent_space_step_ = 
+        linear_solver.solve(at_weight * tangent_space_residual_);
+    if (linear_solver.info() != Eigen::Success) {
       LOG(ERROR) << "Failed to solve the least squares system.";
       return false;
     }
